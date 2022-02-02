@@ -48,7 +48,7 @@ const obtenerCocherasFiltradas = async ( req, res ) =>{
             distanceMultiplier: 0.001,
             maxDistance: parseFloat(mts),
             query: { estado: true },
-            }).project( { '_id': 0, "location":0  , '__v': 0, 'createdAt': 0, 'updatedAt': 0})
+            }).project( { '_id': 0, '__v': 0, 'createdAt': 0, 'updatedAt': 0})
             .addFields({'dist_kms': '$dist.calculated'})
             
             
