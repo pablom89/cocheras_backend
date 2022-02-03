@@ -26,10 +26,10 @@ class Server{
         this.middlewares()
         this.routes()
         
-        /* this.corsOptions = {
-            origin: 'http://localhost:3000',
+        this.corsOptions = {
+            origin: 'https://parking-now.herokuapp.com',
             optionsSuccessStatus: 200 
-        } */
+        }
     }
     
     async conectarDB(){
@@ -39,7 +39,7 @@ class Server{
     middlewares(){
         
         // cors
-        this.app.use( cors())
+        this.app.use( cors(this.corsOptions))
         
         // lectura y parseo del body
         this.app.use( express.json() )
