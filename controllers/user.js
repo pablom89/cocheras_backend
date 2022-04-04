@@ -10,8 +10,8 @@ const obtenerUsuarios = async( req, res ) => {
 
     try {
         const [ total, usuarios ] = await Promise.all([
-            User.countDocuments({ estado: true}),
-            User.find({estado: true } )
+            User.countDocuments(),
+            User.find()
                 .limit( Number( limite ))
                 .skip( Number( desde ))
         ])
@@ -68,12 +68,13 @@ const crearUsuario = async( req, res ) =>{
 const editarUsuario = async( req, res )=>{
 
     const { id } = req.params;
+    let passwordmodif;
     const{ password, correo, nombre } = req.body;
 
     // si manda la pass la encripto, si es la misma queda igual y si la modifica se cambia
     if( password ) {
         const salt = bcryptjs.genSaltSync();
-        req.body.password = bcryptjs.hashSync( password, salt )
+        passwordmodif = bcryptjs.hashSync( password, salt )
     }
 
     const regex1 = new RegExp( nombre, 'i')
@@ -93,7 +94,7 @@ const editarUsuario = async( req, res )=>{
         })
     }
     
-    const usuario = await User.findByIdAndUpdate( id, { nombre: nombre, correo: correo } , { new: true } )
+    const usuario = await User.findByIdAndUpdate( id, { nombre: nombre, correo: correo, password: passwordmodif } , { new: true } )
     
     res.status(200).json({
         msg: 'Los datos han sido actualizados',
@@ -105,14 +106,21 @@ const editarUsuario = async( req, res )=>{
 const borrarUsuario = async( req, res ) =>{
 
     const { id } = req.params;
-    const responsable = req.usuario;
+    
+    try {
+        const usuario = await User.findByIdAndUpdate( id, { estado: false }, { new: true } )
+    
+        res.status(200).json({
+            usuario,
+        })
+        
+    } catch (error) {
+        console.log( error )
+        return res.status(500).json({
+            msg: 'Se produjo un error comunicarse con el administrador'
+        })
+    }
 
-    const usuario = await User.findByIdAndUpdate( id, { estado: false }, { new: true } )
-
-    res.status(200).json({
-        usuario,
-        responsable
-    })
 }
 
 module.exports = {

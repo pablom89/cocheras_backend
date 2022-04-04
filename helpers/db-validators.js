@@ -1,20 +1,22 @@
 const Cochera = require('../models/Cochera');
 const Vehiculo = require('../models/Vehiculo');
 const User = require('../models/user');
+const Role = require('../models/Role');
+const Rodado = require('../models/Rodado');
 
 // *********** USUARIO ****************//
 
 const existeUserConNombre = async( nombre ) =>{
 
-    const existeElNombre = await User.findOne({ nombre })
+    const existeElNombre = await User.findOne({ nombre, estado: true })
     if( existeElNombre ) {
-        throw new Error( `El correo ${ nombre } ya se encuentra registrado`)
+        throw new Error( `El nombre ${ nombre } ya se encuentra registrado`)
     }
 }
 
 const existeUserConCorreo = async( correo ) =>{
 
-    const existeElCorreo = await User.findOne({ correo })
+    const existeElCorreo = await User.findOne({ correo, estado: true })
     if( existeElCorreo ) {
         throw new Error( `El correo ${ correo } ya se encuentra registrado`)
     }
@@ -22,12 +24,22 @@ const existeUserConCorreo = async( correo ) =>{
 
 const existeUserConId = async( id ) => {
 
-    const existeElUser = await User.findById( id )
+    const existeElUser = await User.findById( id)
     if( !existeElUser ){
         throw new Error( `No existe un usuario con el id : ${ id }`)
     }
 }
 
+/************* ROLES ****************** */
+
+const esRolPermitido = async( rol ) => {
+    
+    const existeRol = await Role.findOne({ nombre: rol })
+    if( !existeRol ){
+        throw new Error(`El rol: ${rol} no es un rol permitido`)
+    }
+    
+}
 
 
 
@@ -44,11 +56,22 @@ const existeVehiculoConPatente =async ( patente ) => {
 
 const existeVehiculoConId = async ( id ) => {
 
-    const existeVehiculo = await Vehiculo.findById( id );
+    const existeVehiculo = await Vehiculo.findOne({_id: id, estado: true } );
     if( !existeVehiculo ){
-        throw new Error(`El vehiculo con el id ${ id } no existe`)
+        throw new Error(`El vehiculo con el id ${ id } no existe o ha sido eliminado`)
     }
 
+}
+
+const esClasePermitida = async( clase ) => {
+
+    let clasesPermitidas = ['AUTOMOVIL', 'MOTOCICLETA','COLECTIVO','CUATRICICLO','BICICLETA','CAMION','CAMIONETA']
+
+    const regex =  new RegExp( clase, 'i')
+    const existeClase = await Rodado.findOne({ nombre: regex})
+    if( !existeClase ){
+        throw new Error(`La clase ${ clase } no está permitida, clases: ${clasesPermitidas}`)
+    }
 }
 
 /// ****** COCHERAS *********
@@ -72,11 +95,13 @@ const existeCocheraConDir = async ( direccion ) => {
 }
 
 const existeCocheraConId = async ( id ) =>{
-    const existeLaCocheraXId = await Cochera.findById( id )
+    const existeLaCocheraXId = await Cochera.findOne( { _id: id , estado: true } )
         if( !existeLaCocheraXId){
             throw new Error( `No existe una cochera con el id ${ id }`)
         }
 }
+
+
 
 
 
@@ -89,5 +114,8 @@ module.exports = {
     existeVehiculoConId,
     existeNombre,
     existeCocheraConId,
-    existeCocheraConDir
+    existeCocheraConDir,
+    esRolPermitido,
+    esClasePermitida
+    
 }

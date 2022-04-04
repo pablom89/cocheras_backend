@@ -1,11 +1,15 @@
 
 const { Router } = require('express');
-const { check } = require('express-validator');
+const { check, body } = require('express-validator');
+const {
+    existeVehiculoConPatente,
+    existeVehiculoConId,
+    esClasePermitida
+} = require('../helpers')
 const {
     validarCampos,
     validarJWT,
-    existeVehiculoConPatente,
-    existeVehiculoConId
+    esAdminRol,
 } = require('../middlewares')
 const { crearVehiculo, 
         borrarVehiculo, 
@@ -18,8 +22,12 @@ const { crearVehiculo,
 const router = Router();
 
 
-// OBTIENE TODOS LOS VEHICULOS 
-router.get('/', obtenerVehiculos)
+// OBTIENE TODOS LOS VEHICULOS -- 
+router.get('/',
+[
+    validarJWT,
+    esAdminRol
+],obtenerVehiculos)
 
 // OBTENER VEHICULOS X USUARIO
 router.get('/user', validarJWT, obtenerVehiculosUser)
@@ -28,6 +36,7 @@ router.get('/user', validarJWT, obtenerVehiculosUser)
 router.get('/:id',
     [   
         validarJWT,
+        esAdminRol,
         check('id', 'No corresponde a un id valido').isMongoId(),
         check('id').custom( existeVehiculoConId ),
         validarCampos
@@ -38,9 +47,10 @@ router.get('/:id',
 router.post('/',
 [
     validarJWT,
-    
     check('clase','El vehículo es obligatorio').not().isEmpty(),
-    check('patente', 'La patente es obligatoria').not().isEmpty(),
+    body('clase').trim(),
+    check('clase').custom( esClasePermitida ),
+    check('patente','Debe ser un formato valido: LLLNNN o LLNNNLL - auto | LNNNLLL o NNNLLL - moto').matches(/^[ña-z]{2}\d{3}[ña-z]{2}$|^[ña-z]{3}\d{3}$|^[ña-z]{1}\d{3}[ña-z]{3}$|^\d{3}[ña-z]{3}$/gi),
     check('patente').custom( existeVehiculoConPatente ),
     check('seguro', 'El seguro es mandatorio').not().isEmpty(),
     validarCampos
@@ -54,9 +64,11 @@ router.put('/:id',
     validarJWT,
     check('id','No es un id valido de mongo').isMongoId(),
     check('id').custom( existeVehiculoConId ),
-    check('patente','El campo patente es obligatorio').not().isEmpty(),
-    check('clase','El campo clase es obligatorio').not().isEmpty(),// validar contra una categoria de la bd
+    check('clase').custom( esClasePermitida ),
+    check('patente','Debe ser un formato valido: LLLNNN o LLNNNLL - auto | LNNNLLL o NNNLLL - moto').matches(/^[ña-z]{2}\d{3}[ña-z]{2}$|^[ña-z]{3}\d{3}$|^[ña-z]{1}\d{3}[ña-z]{3}$|^\d{3}[ña-z]{3}$/gi),
     check('seguro','El campo seguro es obligatorio').not().isEmpty(),
+    body('marca').trim(),
+    body('modelo').trim(),
     validarCampos
 ]
 ,editarVehiculo )

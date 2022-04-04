@@ -8,9 +8,9 @@ const router = Router();
 
 router.post('/login',
   [
-    check('correo', 'El correo es obligatorio').not().isEmpty(),
+    
     check('correo', 'Correo no válido').isEmail(),
-    check('password', 'La contraseña debe ser de entre 4 a 12 caracteres').isLength({ min: 4, max: 12}),
+    check('password', 'La contraseña debe ser de entre 4 a 12 caracteres').trim().isLength({ min: 4, max: 12}),
     validarCampos
   ]
 ,login )

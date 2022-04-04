@@ -4,13 +4,41 @@ const Vehiculo = require('../models/Vehiculo');
 
 const obtenerVehiculos = async ( req, res ) =>{
 
-    const { limite = 10, desde = 0 } = req.params;
-    const query = { estado: true }
+    const { limite = 10, desde = 0 } = req.query;
+    let query = {};
+
+    if( req.query.estado !== undefined && req.query.estado.length > 0){
+        if( req.query.estado === 'true'){
+            query['estado'] = true
+        }else if( req.query.estado === 'false'){
+            query['estado'] = false
+        }else{
+            return res.status(400).json({
+                msg: 'Parametros inválidos'
+            })
+        }
+    }
+
+    if( req.query.clase !== undefined && req.query.clase.length > 0){
+        query['clase'] = req.query.clase.toUpperCase()
+    }
+
+    if( req.query.seguro !== undefined && req.query.seguro.length > 0){
+        if( req.query.seguro === 'true'){
+            query['seguro'] = true
+        }else if( req.query.seguro === 'false'){
+            query['seguro'] = false
+        }else{
+            return res.status(400).json({
+                msg: 'Parametros inválidos'
+            })
+        }
+    }
 
     try {
         const [ total, vehiculos ] = await Promise.all([
-            Vehiculo.countDocuments( query ),
-            Vehiculo.find( query )
+            Vehiculo.countDocuments(query),
+            Vehiculo.find(query)
                 .limit( Number( limite ))
                 .skip( Number( desde ))
         ])
@@ -119,7 +147,7 @@ const editarVehiculo = async( req, res ) => {
 
     const { id } = req.params;
     const { _id } = req.usuario;
-    const { patente, seguro, clase } = req.body;
+    const { patente, seguro, clase, marca, modelo } = req.body;
 
     const uid = _id.toString();
 
@@ -142,7 +170,7 @@ const editarVehiculo = async( req, res ) => {
         })
     }
 
-    const vehiculo = await Vehiculo.findByIdAndUpdate( id, { clase: clase, seguro: seguro, patente: patente  }, { new: true })
+    const vehiculo = await Vehiculo.findByIdAndUpdate( id, { clase: clase, seguro: seguro, patente: patente, marca: marca, modelo: modelo  }, { new: true })
 
     res.status(200).json({
         msg: 'Los datos han sido actualizados',

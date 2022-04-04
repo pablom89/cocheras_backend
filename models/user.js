@@ -13,18 +13,27 @@ const userSchema = Schema({
     nombre:{
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        uppercase: true,
+        trim: true
     },
 
     correo: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
     },
 
     password: {
         type: String,
-        required: true,   
+        required: true, 
+        trim: true  
+    },
+
+    rol:{
+        type: String,
+        required: true
     },
 
     estado:{

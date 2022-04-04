@@ -1,12 +1,16 @@
 const { Router } = require('express');
-const { check } = require('express-validator');
+const { check, body } = require('express-validator');
+const {
+  existeUserConNombre,
+  existeUserConCorreo,
+  existeUserConId,
+  esRolPermitido
+} = require('../helpers')
 
 const {
   validarCampos,
   validarJWT,
-  existeUserConNombre,
-  existeUserConCorreo,
-  existeUserConId,
+  esAdminRol
 } = require('../middlewares')
 const { crearUsuario, obtenerUsuarios, borrarUsuario, obtenerUsuario, editarUsuario } = require('../controllers/user');
 const router = Router();
@@ -14,12 +18,19 @@ const router = Router();
 
 // OBTENER USUARIOS DE FORMA PAGINADA
 
-router.get('/', obtenerUsuarios) 
+router.get('/',
+[
+  validarJWT,
+  esAdminRol
+]
+,obtenerUsuarios) 
 
 // OBTENER USUARIOS POR ID
 
 router.get('/:id',
      [
+        validarJWT,
+        esAdminRol,
         check('id', 'No es un id válido').isMongoId(),
         check('id').custom( existeUserConId ),
         validarCampos
@@ -33,10 +44,11 @@ router.post('/registro',
   [   
     check('nombre', 'El campo nombre es obligatorio').not().isEmpty(),
     check('nombre').custom( existeUserConNombre ),
-    check('correo', 'El campo correo es obligatorio').not().isEmpty(),
     check('correo', 'Debes ingresar un correo valido').isEmail(),
     check('correo').custom( existeUserConCorreo ),
-    check('password', 'El campo password es obligatorio').not().isEmpty(),
+    check('rol','El campo rol no puede estar vacío').not().isEmpty(),
+    body('rol').toUpperCase().trim(),
+    check('rol').custom( esRolPermitido ),
     check('password', 'La contraseña debe de ser entre 4 a 12 caracteres').isLength( { min: 4, max: 12 }),
     validarCampos   
   ]
@@ -56,7 +68,6 @@ router.put('/:id', [
       }
       return true
     }),
-    check('password', 'El campo password es obligatorio').not().isEmpty(),
     check('password', 'La contraseña debe de ser entre 4 a 12 caracteres').isLength( { min: 4, max: 12 }),
     validarCampos
 

@@ -5,6 +5,7 @@ const esElMismo = async ( req ) =>{
     const { id } = req.params;
     const { _id } = req.usuario;
 
+    // se convierten a strings xq dos objetos por mas que tengan los mismos valores no son iguales
     const idUser = _id.toString();
 
     const cocheraDB = await Cochera.findById( id );

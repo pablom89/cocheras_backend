@@ -8,12 +8,15 @@ const cocheraSchema = Schema({
     nombre: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        uppercase: true,
+        trim: true
     },
 
     direccion:{
         type: String,
-        required: true  
+        required: true, 
+        trim: true 
     },
     
     mensual: { 
@@ -110,6 +113,19 @@ cocheraSchema.pre('save', async function(next){
 
     next()
 })
+
+// UPDATE ONE
+
+/*  cocheraSchema.pre('updateOne', async function(next){
+    const loc = await geocoder.geocode( this.direccion )
+    this.location = {
+        type: 'Point',
+        coordinates: [ loc[0].longitude , loc[0].latitude ]
+    }
+
+    next()
+})
+ */
 
 cocheraSchema.methods.toJSON = function(){
   const { __v, password, _id, ...cochera } = this.toObject();

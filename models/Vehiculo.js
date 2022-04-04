@@ -5,10 +5,11 @@ const { Schema, model } = require('mongoose');
 /* 
 
     {
-        "vehículo": "auto/camioneta/camion/colectivo...etc",
-        "marca": "Ford",
-        "patente":"ab 123 cd"
+        "clase": "automovil/camioneta/camion/colectivo/motocicleta",
+        "patente":"ab123cd o aaa123 o a123bcd o 111aaa"
         "seguro": true/false
+        "marca": "Ford",
+        "modelo":"fiesta"
     }
 
 */
@@ -18,13 +19,17 @@ const vehiculoSchema = Schema({
     clase: {
         type: String,
         required: true,
+        trim: true,
+        uppercase: true
     },
     
     
     patente: {
         type: String,
         required: true,
-        unique: true   
+        unique: true,
+        trim: true,
+        uppercase: true   
     },
 
     seguro:{
@@ -34,12 +39,14 @@ const vehiculoSchema = Schema({
 
     marca: {
         type: String,
-        default: 'Otro'
+        default: 'Otro',
+        trim: true
     },
 
     modelo:{
         type: String,
-        default: 'generico'
+        default: 'generico',
+        trim: true
     },
 
     usuario:{

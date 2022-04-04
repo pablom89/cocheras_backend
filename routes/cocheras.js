@@ -2,10 +2,12 @@ const { Router } = require('express');
 const { check } = require( 'express-validator');
 const Cochera = require('../models/Cochera');
 const {
-    validarCampos,
     existeNombre,
     existeCocheraConId,
-    existeCocheraConDir,
+    existeCocheraConDir
+} = require('../helpers')
+const {
+    validarCampos,
     validarJWT
 } = require('../middlewares')
 const { 
@@ -28,7 +30,7 @@ router.get('/', obtenerCocheras)
 router.get('/cercanas', obtenerCocherasFiltradas)
 
 // OBTENER COCHERAS POR USUARIO
-router.get('/user/', validarJWT, obtenerCocherasUser )
+router.get('/user', validarJWT, obtenerCocherasUser )
 
 // OBTENER COCHERAS POR ID
 router.get('/:id',
@@ -48,10 +50,10 @@ router.get('/:id',
 router.post('/',
     [   
         validarJWT,
-        check('nombre' , 'El campo nombre no puede estar vacio').not().isEmpty(),
-        check('nombre').custom( existeNombre ),
+        check('nombre' , 'El campo nombre no puede estar vacio').isLength({ min: 3}),
+        check('nombre').trim().custom( existeNombre ),
         check('direccion','El campo direccion es obligatorio').not().isEmpty(),
-        check('direccion').custom( existeCocheraConDir ),
+        check('direccion').trim().custom( existeCocheraConDir ),
         validarCampos
     ]
 ,crearCochera )
@@ -70,7 +72,6 @@ router.delete('/:id',
 // EDITAR COCHERA
 
 router.put('/:id',
-// requerir JWT y validar que la cochera pertenezca a quien la quiere modificar, si no, un usuario seria capaz de modificar la cochera de otra persona
 [   
     validarJWT,
     check('id', 'No es un id válido').isMongoId(),
